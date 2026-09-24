@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -8,6 +8,17 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.19" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.20" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.20">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmartClinicQueue.Application\SmartClinicQueue.Application.csproj" />
+    <ProjectReference Include="..\SmartClinicQueue.Domain\SmartClinicQueue.Domain.csproj" />
+    <ProjectReference Include="..\SmartClinicQueue.Infrastructure\SmartClinicQueue.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

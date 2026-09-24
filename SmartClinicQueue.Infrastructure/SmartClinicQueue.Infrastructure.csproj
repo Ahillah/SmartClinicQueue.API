@@ -6,4 +6,17 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.20" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.20">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmartClinicQueue.Application\SmartClinicQueue.Application.csproj" />
+    <ProjectReference Include="..\SmartClinicQueue.Domain\SmartClinicQueue.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

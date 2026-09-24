@@ -6,4 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="DTO%27s\" />
+    <Folder Include="Interfaces\IServices\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmartClinicQueue.Domain\SmartClinicQueue.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
