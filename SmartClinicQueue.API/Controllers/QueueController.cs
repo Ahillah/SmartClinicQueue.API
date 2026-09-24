@@ -4,7 +4,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmartClinicQueue.Application.Common;
 using SmartClinicQueue.Application.DTO_s;
+using SmartClinicQueue.Application.Features.Queue.Commands.CallNextPatient;
+using SmartClinicQueue.Application.Features.Queue.Commands.CancelTicket;
+using SmartClinicQueue.Application.Features.Queue.Commands.CompleteConsultation;
 using SmartClinicQueue.Application.Features.Queue.Commands.JoinQueue;
+using SmartClinicQueue.Application.Features.Queue.Commands.MarkNoShow;
+using SmartClinicQueue.Application.Features.Queue.Commands.StartConsultation;
 using SmartClinicQueue.Application.Features.Queue.Queries.GetMyTicket;
 using SmartClinicQueue.Application.Features.Queue.Queries.GetQueue;
 using SmartClinicQueue.Domain.Constant;
@@ -46,6 +51,67 @@ namespace SmartClinicQueue.API.Controllers
         {
             var result = await _mediator.Send(new GetQueueQuery() { DoctorId=doctorId});
             return Ok(ApiResponse<IEnumerable<QueueItemDto>>.Success(result));
+        }
+
+        [Authorize(Roles = Roles.Doctor)]
+        [HttpPost("doctor/{doctorId}/call-next")]
+        public async Task<IActionResult> CallNext(int doctorId)
+        {
+            var ticketId = await _mediator.Send(
+                new CallNextPatientCommand() { DoctorId=doctorId});
+
+            return Ok(
+                ApiResponse<int>.Success(
+                    ticketId,
+                    "Next patient called successfully."));
+        }
+        [Authorize(Roles = Roles.Doctor)]
+        [HttpPost("{ticketId}/start-consultation")]
+        public async Task<IActionResult> StartConsultation(int ticketId)
+        {
+            await _mediator.Send(
+                new StartConsultationCommand() { TicketId=ticketId});
+
+            return Ok(
+                ApiResponse<bool>.Success(
+                    true,
+                    "Consultation started successfully."));
+        }
+        [Authorize(Roles = Roles.Doctor)]
+        [HttpPost("{ticketId}/complete-consultation")]
+        public async Task<IActionResult> CompleteConsultation(int ticketId)
+        {
+            await _mediator.Send(
+                new CompleteConsultationCommand() { TicketId= ticketId});
+
+            return Ok(
+                ApiResponse<bool>.Success(
+                    true,
+                    "Consultation completed successfully."));
+        }
+        [Authorize(Roles = Roles.Receptionist)]
+        [HttpPost("{ticketId}/cancel")]
+        public async Task<IActionResult> CancelTicket(int ticketId)
+        {
+            await _mediator.Send(
+                new CancelTicketCommand(){ TicketId = ticketId });
+
+            return Ok(
+                ApiResponse<bool>.Success(
+                    true,
+                    "Ticket cancelled successfully."));
+        }
+        [Authorize(Roles = Roles.Doctor)]
+        [HttpPost("{ticketId}/no-show")]
+        public async Task<IActionResult> MarkNoShow(int ticketId)
+        {
+            await _mediator.Send(
+                new MarkNoShowCommand() { TicketId = ticketId });
+
+            return Ok(
+                ApiResponse<bool>.Success(
+                    true,
+                    "Patient marked as no-show successfully."));
         }
     }
 }

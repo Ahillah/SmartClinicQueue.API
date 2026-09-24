@@ -21,7 +21,7 @@ namespace SmartClinicQueue.Infrastructure.Repositories
         public async Task<QueueTicket?> GetActiveTicketByPatientAsync(int patientId)
         {
             return await _dbSet
-                .AsNoTracking()
+              
                 .FirstOrDefaultAsync(t =>
                     t.PatientId == patientId &&
                     (t.Status == QueueStatus.Waiting ||
