@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SmartClinicQueue.Application.Interfaces.IReposirories;
+using SmartClinicQueue.Application.Interfaces.IServices;
 using SmartClinicQueue.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,15 @@ namespace SmartClinicQueue.Application.Features.Queue.Commands.CallNextPatient
         : IRequestHandler<CallNextPatientCommand, int>
     {
         private readonly IQueueTicketRepository _queueTicketRepository;
+        private readonly IQueueNotificationService _queueNotificationService;
 
         public CallNextPatientCommandHandler(
-            IQueueTicketRepository queueTicketRepository)
+            IQueueTicketRepository queueTicketRepository,
+             IQueueNotificationService queueNotificationService
+            )
         {
             _queueTicketRepository = queueTicketRepository;
+            _queueNotificationService = queueNotificationService;
         }
 
         public async Task<int> Handle(
@@ -52,6 +57,8 @@ namespace SmartClinicQueue.Application.Features.Queue.Commands.CallNextPatient
 
             _queueTicketRepository.Update(nextPatient);
             await _queueTicketRepository.SaveChangesAsync();
+            await _queueNotificationService 
+    .NotifyQueueUpdatedAsync(request.DoctorId); 
 
             return nextPatient.Id;
         }

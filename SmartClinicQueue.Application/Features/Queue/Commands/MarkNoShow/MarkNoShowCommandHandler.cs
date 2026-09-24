@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SmartClinicQueue.Application.Interfaces.IReposirories;
+using SmartClinicQueue.Application.Interfaces.IServices;
 using SmartClinicQueue.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,14 @@ namespace SmartClinicQueue.Application.Features.Queue.Commands.MarkNoShow
         : IRequestHandler<MarkNoShowCommand, bool>
     {
         private readonly IQueueTicketRepository _queueTicketRepository;
-
+        private readonly IQueueNotificationService _queueNotificationService;
         public MarkNoShowCommandHandler(
-            IQueueTicketRepository queueTicketRepository)
+            IQueueTicketRepository queueTicketRepository,
+             IQueueNotificationService queueNotificationService
+            )
         {
             _queueTicketRepository = queueTicketRepository;
+            _queueNotificationService = queueNotificationService;
         }
 
         public async Task<bool> Handle(
@@ -39,6 +43,8 @@ namespace SmartClinicQueue.Application.Features.Queue.Commands.MarkNoShow
             _queueTicketRepository.Update(ticket);
 
             await _queueTicketRepository.SaveChangesAsync();
+            await _queueNotificationService
+ .NotifyQueueUpdatedAsync(ticket.DoctorId);
 
             return true;
         }

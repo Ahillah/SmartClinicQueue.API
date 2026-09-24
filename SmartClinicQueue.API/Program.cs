@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using SmartClinicQueue.API.Hubs;
 using SmartClinicQueue.API.Middleware;
+using SmartClinicQueue.API.Services;
 using SmartClinicQueue.Application.Interfaces.IReposirories;
 using SmartClinicQueue.Application.Interfaces.IServices;
 using SmartClinicQueue.Application.Services;
@@ -97,7 +99,8 @@ namespace SmartClinicQueue.API
             builder.Services.AddMediatR(cfg =>
                 cfg.RegisterServicesFromAssembly(
                     typeof(IAuthService).Assembly));
-
+            builder.Services.AddSignalR();
+            builder.Services.AddScoped<IQueueNotificationService, QueueNotificationService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -116,7 +119,7 @@ namespace SmartClinicQueue.API
             // Custom Middleware
             app.UseMiddleware<ExceptionHandlingMiddleware>();
             app.UseMiddleware<RequestLoggingMiddleware>();
-
+            app.MapHub<QueueHub>("/hubs/queue");
             app.MapControllers();
 
             app.Run();

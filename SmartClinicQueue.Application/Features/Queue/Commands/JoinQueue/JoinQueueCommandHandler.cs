@@ -1,5 +1,7 @@
 ﻿using MediatR;
+
 using SmartClinicQueue.Application.Interfaces.IReposirories;
+using SmartClinicQueue.Application.Interfaces.IServices;
 using SmartClinicQueue.Domain.Entities;
 using SmartClinicQueue.Domain.Enums;
 using System;
@@ -8,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace SmartClinicQueue.Application.Features.Queue.Commands.JoinQueue
 {
    
@@ -15,10 +18,13 @@ namespace SmartClinicQueue.Application.Features.Queue.Commands.JoinQueue
             : IRequestHandler<JoinQueueCommand, int>
         {
             private readonly IQueueTicketRepository _queueTicketRepository;
+        private readonly IQueueNotificationService _queueNotificationService;
 
-            public JoinQueueCommandHandler(IQueueTicketRepository queueTicketRepository)
+        public JoinQueueCommandHandler(IQueueTicketRepository queueTicketRepository,
+            IQueueNotificationService queueNotificationService)
             {
                 _queueTicketRepository = queueTicketRepository;
+                _queueNotificationService = queueNotificationService;   
             }
 
             public async Task<int> Handle(
@@ -52,8 +58,10 @@ namespace SmartClinicQueue.Application.Features.Queue.Commands.JoinQueue
 
                 await _queueTicketRepository.AddAsync(ticket);
                 await _queueTicketRepository.SaveChangesAsync();
+            await _queueNotificationService
+    .NotifyQueueUpdatedAsync(request.DoctorId);
 
-                return ticket.Id;
+            return ticket.Id;
             }
         }
     }
