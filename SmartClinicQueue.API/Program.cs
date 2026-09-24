@@ -1,14 +1,17 @@
-using System.Text;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SmartClinicQueue.API.Middleware;
+using SmartClinicQueue.Application.Interfaces.IReposirories;
 using SmartClinicQueue.Application.Interfaces.IServices;
 using SmartClinicQueue.Application.Services;
 using SmartClinicQueue.Domain.Entities;
 using SmartClinicQueue.Infrastructure.Persistance;
+using SmartClinicQueue.Infrastructure.Repositories;
+using System.Text;
 
 namespace SmartClinicQueue.API
 {
@@ -72,10 +75,23 @@ namespace SmartClinicQueue.API
 
             // Authorization
             builder.Services.AddAuthorization();
-
+            builder.Services.AddRateLimiter(options =>
+            {
+                options.AddFixedWindowLimiter("AuthPolicy", limiterOptions =>
+                {
+                    limiterOptions.PermitLimit = 5;
+                    limiterOptions.Window = TimeSpan.FromMinutes(1);
+                    limiterOptions.QueueLimit = 0;
+                });
+            });
             // Application Services
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IJwtService, JwtService>();
+            builder.Services.AddScoped(
+   typeof(IGenericRepository<,>),
+   typeof(GenericRepository<,>));
+            builder.Services.AddScoped<IQueueTicketRepository, QueueTicketRepository>();
+  
 
             // MediatR
             builder.Services.AddMediatR(cfg =>
@@ -96,7 +112,7 @@ namespace SmartClinicQueue.API
             // Authentication must come before Authorization
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseRateLimiter();
             // Custom Middleware
             app.UseMiddleware<ExceptionHandlingMiddleware>();
             app.UseMiddleware<RequestLoggingMiddleware>();

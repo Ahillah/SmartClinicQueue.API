@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SmartClinicQueue.Application.Common;
 using SmartClinicQueue.Application.DTO_s;
 using SmartClinicQueue.Application.Interfaces.IServices;
@@ -8,6 +9,7 @@ namespace SmartClinicQueue.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableRateLimiting("AuthPolicy")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
