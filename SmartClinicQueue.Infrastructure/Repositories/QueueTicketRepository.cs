@@ -64,5 +64,16 @@ namespace SmartClinicQueue.Infrastructure.Repositories
                     (t.Status == QueueStatus.Called ||
                      t.Status == QueueStatus.InConsultation));
         }
+
+        public async Task<IEnumerable<QueueTicket>> GetWaitingTicketsFromPreviousDaysAsync()
+        {
+            var today = DateTime.UtcNow.Date;
+
+            return await _dbSet
+                .Where(t =>
+                    t.Status == QueueStatus.Waiting &&
+                    t.CreatedAt < today)
+                .ToListAsync();
+        }
     }
 }

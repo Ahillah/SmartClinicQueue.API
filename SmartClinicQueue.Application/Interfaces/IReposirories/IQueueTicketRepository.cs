@@ -16,5 +16,8 @@ namespace SmartClinicQueue.Application.Interfaces.IReposirories
         Task<IEnumerable<QueueTicket>> GetActiveQueueByDoctorAsync(int doctorId);
 
         Task<QueueTicket?> GetCurrentServingAsync(int doctorId);
+
+        Task<IEnumerable<QueueTicket>>
+    GetWaitingTicketsFromPreviousDaysAsync();
     }
 }

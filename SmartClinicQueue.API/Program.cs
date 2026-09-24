@@ -1,3 +1,4 @@
+using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -13,6 +14,7 @@ using SmartClinicQueue.Application.Services;
 using SmartClinicQueue.Domain.Entities;
 using SmartClinicQueue.Infrastructure.Persistance;
 using SmartClinicQueue.Infrastructure.Repositories;
+using SmartClinicQueue.Infrastructure.Services;
 using System.Text;
 
 namespace SmartClinicQueue.API
@@ -93,7 +95,20 @@ namespace SmartClinicQueue.API
    typeof(IGenericRepository<,>),
    typeof(GenericRepository<,>));
             builder.Services.AddScoped<IQueueTicketRepository, QueueTicketRepository>();
-  
+            builder.Services.AddScoped<IQueueCleanupService, QueueCleanupService>();
+
+            builder.Services.AddScoped<
+                IBackgroundJobScheduler,
+                HangfireBackgroundJobScheduler>();
+            builder.Services.AddHangfire(config =>
+    config
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UseSqlServerStorage(
+            builder.Configuration.GetConnectionString("HangfireConnection")));
+
+            builder.Services.AddHangfireServer();
+
 
             // MediatR
             builder.Services.AddMediatR(cfg =>
@@ -121,7 +136,16 @@ namespace SmartClinicQueue.API
             app.UseMiddleware<RequestLoggingMiddleware>();
             app.MapHub<QueueHub>("/hubs/queue");
             app.MapControllers();
+            using (var scope = app.Services.CreateScope())
+            {
+                var scheduler =
+                    scope.ServiceProvider
+                        .GetRequiredService<IBackgroundJobScheduler>();
 
+                scheduler.ScheduleDailyQueueCleanup(
+                    service => service.CleanupExpiredQueueAsync(),
+                    Cron.Daily(0, 0));
+            }
             app.Run();
         }
     }
